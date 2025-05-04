@@ -9,6 +9,7 @@ using Soenneker.Stripe.SetupIntents.Abstract;
 using Soenneker.Utils.AsyncSingleton;
 using Stripe;
 using Soenneker.Extensions.String;
+using Soenneker.Stripe.SetupIntents.Enums;
 
 namespace Soenneker.Stripe.SetupIntents;
 
@@ -26,10 +27,12 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
         });
     }
 
-    public async ValueTask<SetupIntent> Create(string customerId, bool confirm = false, string? paymentMethodId = null, string? usage = "off_session",
+    public async ValueTask<SetupIntent> Create(string customerId, SetupIntentUsage? usage, bool confirm = false, string? paymentMethodId = null,
         string? returnUrl = null, SetupIntentMandateDataOptions? mandateOptions = null, string? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
+        usage ??= SetupIntentUsage.OffSession;
+
         var options = new SetupIntentCreateOptions
         {
             Customer = customerId,
@@ -51,6 +54,13 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
         };
 
         return await service.CreateAsync(options, requestOptions, cancellationToken).NoSync();
+    }
+
+    public ValueTask<SetupIntent> CreateAndConfirmForOffSessionCard(string customerId, string paymentMethodId, string? returnUrl = null,
+        string? idempotencyKey = null, CancellationToken cancellationToken = default)
+    {
+        return Create(customerId, usage: SetupIntentUsage.OffSession, confirm: true, paymentMethodId: paymentMethodId, returnUrl: returnUrl,
+            mandateOptions: null, idempotencyKey: idempotencyKey, cancellationToken);
     }
 
     public async ValueTask<SetupIntent> Get(string id, CancellationToken cancellationToken = default)
