@@ -40,7 +40,8 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
             Confirm = confirm,
             ReturnUrl = returnUrl,
             PaymentMethod = paymentMethodId,
-            MandateData = mandateOptions
+            MandateData = mandateOptions,
+            AutomaticPaymentMethods = new SetupIntentAutomaticPaymentMethodsOptions {Enabled = true}
         };
 
         SetupIntentService service = await _service.Get(cancellationToken).NoSync();
