@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Soenneker.Extensions.Task;
@@ -9,7 +8,7 @@ using Soenneker.Stripe.SetupIntents.Abstract;
 using Soenneker.Utils.AsyncSingleton;
 using Stripe;
 using Soenneker.Extensions.String;
-using Soenneker.Stripe.SetupIntents.Enums;
+using Soenneker.Stripe.Enums.SetupIntentUsage;
 
 namespace Soenneker.Stripe.SetupIntents;
 
@@ -114,13 +113,11 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
         _service.Dispose();
     }
 
     public ValueTask DisposeAsync()
     {
-        GC.SuppressFinalize(this);
         return _service.DisposeAsync();
     }
 }
