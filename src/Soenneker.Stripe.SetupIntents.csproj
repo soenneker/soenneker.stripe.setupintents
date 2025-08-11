@@ -49,7 +49,7 @@
     
     <ItemGroup>
         <PackageReference Include="Intellenum" Version="1.0.6" />
-        <PackageReference Include="Soenneker.Stripe.Client" Version="3.0.1078" />
+        <PackageReference Include="Soenneker.Stripe.Client" Version="3.0.1081" />
         <PackageReference Include="Soenneker.Stripe.Enums.SetupIntentUsage" Version="3.0.1" />
     </ItemGroup>
 </Project>
