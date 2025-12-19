@@ -19,9 +19,10 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
 
     public StripeSetupIntentsUtil(IStripeClientUtil stripeUtil)
     {
-        _service = new AsyncSingleton<SetupIntentService>(async (cancellationToken, _) =>
+        _service = new AsyncSingleton<SetupIntentService>(async cancellationToken =>
         {
-            StripeClient client = await stripeUtil.Get(cancellationToken).NoSync();
+            StripeClient client = await stripeUtil.Get(cancellationToken)
+                                                  .NoSync();
             return new SetupIntentService(client);
         });
     }
@@ -40,20 +41,23 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
             ReturnUrl = returnUrl,
             PaymentMethod = paymentMethodId,
             MandateData = mandateOptions,
-            AutomaticPaymentMethods = new SetupIntentAutomaticPaymentMethodsOptions {Enabled = true}
+            AutomaticPaymentMethods = new SetupIntentAutomaticPaymentMethodsOptions { Enabled = true }
         };
 
-        SetupIntentService service = await _service.Get(cancellationToken).NoSync();
+        SetupIntentService service = await _service.Get(cancellationToken)
+                                                   .NoSync();
 
         if (idempotencyKey.IsNullOrWhiteSpace())
-            return await service.CreateAsync(options, cancellationToken: cancellationToken).NoSync();
+            return await service.CreateAsync(options, cancellationToken: cancellationToken)
+                                .NoSync();
 
         var requestOptions = new RequestOptions
         {
             IdempotencyKey = idempotencyKey
         };
 
-        return await service.CreateAsync(options, requestOptions, cancellationToken).NoSync();
+        return await service.CreateAsync(options, requestOptions, cancellationToken)
+                            .NoSync();
     }
 
     public ValueTask<SetupIntent> CreateAndConfirmForOffSessionCard(string customerId, string paymentMethodId, string? returnUrl = null,
@@ -65,14 +69,18 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
 
     public async ValueTask<SetupIntent> Get(string id, CancellationToken cancellationToken = default)
     {
-        SetupIntentService service = await _service.Get(cancellationToken).NoSync();
-        return await service.GetAsync(id, cancellationToken: cancellationToken).NoSync();
+        SetupIntentService service = await _service.Get(cancellationToken)
+                                                   .NoSync();
+        return await service.GetAsync(id, cancellationToken: cancellationToken)
+                            .NoSync();
     }
 
     public async ValueTask<SetupIntent> Cancel(string id, CancellationToken cancellationToken = default)
     {
-        SetupIntentService service = await _service.Get(cancellationToken).NoSync();
-        return await service.CancelAsync(id, cancellationToken: cancellationToken).NoSync();
+        SetupIntentService service = await _service.Get(cancellationToken)
+                                                   .NoSync();
+        return await service.CancelAsync(id, cancellationToken: cancellationToken)
+                            .NoSync();
     }
 
     public async ValueTask<SetupIntent> Confirm(string id, string? paymentMethodId = null, string? returnUrl = null,
@@ -84,8 +92,10 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
             ReturnUrl = returnUrl
         };
 
-        SetupIntentService service = await _service.Get(cancellationToken).NoSync();
-        return await service.ConfirmAsync(id, options, cancellationToken: cancellationToken).NoSync();
+        SetupIntentService service = await _service.Get(cancellationToken)
+                                                   .NoSync();
+        return await service.ConfirmAsync(id, options, cancellationToken: cancellationToken)
+                            .NoSync();
     }
 
     public async ValueTask<SetupIntent> Update(string id, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
@@ -95,8 +105,10 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
             Metadata = metadata
         };
 
-        SetupIntentService service = await _service.Get(cancellationToken).NoSync();
-        return await service.UpdateAsync(id, options, cancellationToken: cancellationToken).NoSync();
+        SetupIntentService service = await _service.Get(cancellationToken)
+                                                   .NoSync();
+        return await service.UpdateAsync(id, options, cancellationToken: cancellationToken)
+                            .NoSync();
     }
 
     public async ValueTask<IEnumerable<SetupIntent>> List(string customerId, CancellationToken cancellationToken = default)
@@ -107,8 +119,10 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
             Limit = 100
         };
 
-        SetupIntentService service = await _service.Get(cancellationToken).NoSync();
-        return await service.ListAsync(options, cancellationToken: cancellationToken).NoSync();
+        SetupIntentService service = await _service.Get(cancellationToken)
+                                                   .NoSync();
+        return await service.ListAsync(options, cancellationToken: cancellationToken)
+                            .NoSync();
     }
 
     public void Dispose()
