@@ -16,15 +16,19 @@ namespace Soenneker.Stripe.SetupIntents;
 public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
 {
     private readonly AsyncSingleton<SetupIntentService> _service;
+    private readonly IStripeClientUtil _stripeUtil;
 
     public StripeSetupIntentsUtil(IStripeClientUtil stripeUtil)
     {
-        _service = new AsyncSingleton<SetupIntentService>(async cancellationToken =>
-        {
-            StripeClient client = await stripeUtil.Get(cancellationToken)
-                                                  .NoSync();
-            return new SetupIntentService(client);
-        });
+        _stripeUtil = stripeUtil;
+        _service = new AsyncSingleton<SetupIntentService>(CreateService);
+    }
+
+    private async ValueTask<SetupIntentService> CreateService(CancellationToken cancellationToken)
+    {
+        StripeClient client = await _stripeUtil.Get(cancellationToken)
+                                               .NoSync();
+        return new SetupIntentService(client);
     }
 
     public async ValueTask<SetupIntent> Create(string customerId, SetupIntentUsage? usage, bool confirm = false, string? paymentMethodId = null,
