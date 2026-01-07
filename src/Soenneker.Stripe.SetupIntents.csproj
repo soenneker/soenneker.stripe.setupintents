@@ -1,5 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
 
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
@@ -32,22 +33,16 @@
         <LangVersion>latest</LangVersion>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild></PropertyGroup>
-
-    <ItemGroup>
-      <Compile Remove="NewFolder\**" />
-      <EmbeddedResource Remove="NewFolder\**" />
-      <None Remove="NewFolder\**" />
-    </ItemGroup>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 
     <ItemGroup>
         <None Include="..\README.md" Pack="true" PackagePath="\" />
         <None Include="..\LICENSE" Pack="true" PackagePath="\" />
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
-    
+
     <ItemGroup>
-        <PackageReference Include="Intellenum" Version="2.0.1" />
         <PackageReference Include="Soenneker.Stripe.Client" Version="3.0.1201" />
         <PackageReference Include="Soenneker.Stripe.Enums.SetupIntentUsage" Version="4.0.9" />
     </ItemGroup>
