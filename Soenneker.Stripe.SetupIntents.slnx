@@ -4,10 +4,11 @@
   </Folder>
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/build-and-test.yml" />
+    <File Path=".github/workflows/codeql.yml" />
     <File Path=".github/workflows/publish-package.yml" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Soenneker.Stripe.SetupIntents.csproj" />
+    <Project Path="src/Soenneker.Stripe.SetupIntents/Soenneker.Stripe.SetupIntents.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Soenneker.Stripe.SetupIntents.Tests/Soenneker.Stripe.SetupIntents.Tests.csproj" />

@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Stripe.SetupIntents.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Stripe.SetupIntents\Soenneker.Stripe.SetupIntents.csproj" />
     </ItemGroup>
 
     <ItemGroup>
