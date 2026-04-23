@@ -1,20 +1,19 @@
-﻿using Soenneker.Stripe.SetupIntents.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Stripe.SetupIntents.Abstract;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Stripe.SetupIntents.Tests;
 
-[Collection("Collection")]
-public class StripeSetupIntentsUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class StripeSetupIntentsUtilTests : HostedUnitTest
 {
     private readonly IStripeSetupIntentsUtil _util;
 
-    public StripeSetupIntentsUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public StripeSetupIntentsUtilTests(Host host) : base(host)
     {
         _util = Resolve<IStripeSetupIntentsUtil>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
