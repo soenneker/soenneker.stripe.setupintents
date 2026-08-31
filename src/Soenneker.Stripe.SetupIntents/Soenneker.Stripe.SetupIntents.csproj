@@ -46,7 +46,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Stripe.Client" Version="4.0.1463" />
+        <PackageReference Include="Soenneker.Stripe.Client" Version="4.0.1465" />
         <PackageReference Include="Soenneker.Stripe.Enums.SetupIntentUsage" Version="4.0.49" />
     </ItemGroup>
 </Project>
