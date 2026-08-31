@@ -6,7 +6,7 @@ using Soenneker.Stripe.SetupIntents.Abstract;
 namespace Soenneker.Stripe.SetupIntents.Registrars;
 
 /// <summary>
-/// A .NET typesafe implementation of Stripe's Setup Intents API
+/// Registers Stripe setup-intent operations.
 /// </summary>
 public static class StripeSetupIntentsUtilRegistrar
 {

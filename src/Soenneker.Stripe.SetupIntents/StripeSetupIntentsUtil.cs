@@ -12,7 +12,6 @@ using Soenneker.Stripe.Enums.SetupIntentUsage;
 
 namespace Soenneker.Stripe.SetupIntents;
 
-/// <inheritdoc cref="IStripeSetupIntentsUtil"/>
 public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
 {
     private readonly AsyncSingleton<SetupIntentService> _service;
@@ -129,18 +128,11 @@ public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
                             .NoSync();
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
         _service.Dispose();
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
         return _service.DisposeAsync();

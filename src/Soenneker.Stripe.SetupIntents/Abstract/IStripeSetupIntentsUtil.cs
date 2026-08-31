@@ -8,10 +8,20 @@ using Soenneker.Stripe.Enums.SetupIntentUsage;
 namespace Soenneker.Stripe.SetupIntents.Abstract;
 
 /// <summary>
-/// A utility for managing Stripe SetupIntents. Used to securely collect and store payment methods (e.g., cards, ACH) for future use, including off-session billing.
+/// Creates and manages Stripe setup intents for future payment-method use.
 /// </summary>
 public interface IStripeSetupIntentsUtil : IAsyncDisposable, IDisposable
 {
+    /// <summary>
+    /// Releases the lazily initialized setup-intent service owned by this utility.
+    /// </summary>
+    new void Dispose();
+
+    /// <summary>
+    /// Asynchronously releases the lazily initialized setup-intent service owned by this utility.
+    /// </summary>
+    new ValueTask DisposeAsync();
+
     /// <summary>
     /// Creates a new SetupIntent for a given customer, optionally confirming and validating a specified payment method.
     /// </summary>
@@ -82,6 +92,6 @@ public interface IStripeSetupIntentsUtil : IAsyncDisposable, IDisposable
     /// </summary>
     /// <param name="customerId">The Stripe customer ID to filter SetupIntents by.</param>
     /// <param name="cancellationToken">Token to observe while waiting for the task to complete.</param>
-    /// <returns>An enumerable collection of SetupIntent instances.</returns>
+    /// <returns>The first page of SetupIntent instances, limited to 100 items.</returns>
     ValueTask<IEnumerable<SetupIntent>> List(string customerId, CancellationToken cancellationToken = default);
 }
