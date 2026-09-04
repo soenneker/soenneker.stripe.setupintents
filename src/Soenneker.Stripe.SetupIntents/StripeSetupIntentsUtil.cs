@@ -12,6 +12,7 @@ using Soenneker.Stripe.Enums.SetupIntentUsage;
 
 namespace Soenneker.Stripe.SetupIntents;
 
+/// <inheritdoc cref="IStripeSetupIntentsUtil" />
 public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
 {
     private readonly AsyncSingleton<SetupIntentService> _service;
