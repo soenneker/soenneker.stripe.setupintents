@@ -1,4 +1,4 @@
-﻿using Stripe;
+﻿using Soenneker.Stripe.OpenApiClient.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -27,7 +27,7 @@ public interface IStripeSetupIntentsUtil : IAsyncDisposable, IDisposable
     /// </summary>
     /// <param name="customerId">The ID of the Stripe customer the SetupIntent will be associated with.</param>
     /// <param name="usage">
-    /// Indicates how the payment method will be used once saved. 
+    /// Indicates how the payment method will be used once saved.
     /// Use <c>off_session</c> for recurring or background charges, and <c>on_session</c> for interactive checkout flows.
     /// </param>
     /// <param name="confirm">If true, the SetupIntent will be confirmed immediately, triggering validation of the attached payment method.</param>
@@ -38,7 +38,7 @@ public interface IStripeSetupIntentsUtil : IAsyncDisposable, IDisposable
     /// <param name="cancellationToken">Token to observe while waiting for the task to complete.</param>
     /// <returns>The created SetupIntent instance.</returns>
     ValueTask<SetupIntent> Create(string customerId, SetupIntentUsage? usage, bool confirm = false, string? paymentMethodId = null, string? returnUrl = null,
-        SetupIntentMandateDataOptions? mandateOptions = null, string? idempotencyKey = null, CancellationToken cancellationToken = default);
+        PostSetupIntentsXWwwFormUrlencodedRequestMandateData? mandateOptions = null, string? idempotencyKey = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates and immediately confirms a SetupIntent for a card payment method, configured for future off-session charges.

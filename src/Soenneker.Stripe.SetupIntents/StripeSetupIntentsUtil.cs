@@ -1,141 +1,79 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Soenneker.Extensions.Task;
-using Soenneker.Extensions.ValueTask;
+using Soenneker.Stripe.Client;
 using Soenneker.Stripe.Client.Abstract;
+using Soenneker.Stripe.OpenApiClient.Models;
 using Soenneker.Stripe.SetupIntents.Abstract;
-using Soenneker.Utils.AsyncSingleton;
-using Stripe;
-using Soenneker.Extensions.String;
-using Soenneker.Stripe.Enums.SetupIntentUsage;
 
 namespace Soenneker.Stripe.SetupIntents;
 
-/// <inheritdoc cref="IStripeSetupIntentsUtil" />
-public sealed class StripeSetupIntentsUtil : IStripeSetupIntentsUtil
+public sealed class StripeSetupIntentsUtil(IStripeClientUtil client) : IStripeSetupIntentsUtil
 {
-    private readonly AsyncSingleton<SetupIntentService> _service;
-    private readonly IStripeClientUtil _stripeUtil;
-
-    public StripeSetupIntentsUtil(IStripeClientUtil stripeUtil)
+    public async ValueTask<SetupIntent> Create(string customerId, Soenneker.Stripe.Enums.SetupIntentUsage.SetupIntentUsage? usage,
+        bool confirm = false, string? paymentMethodId = null, string? returnUrl = null, PostSetupIntentsXWwwFormUrlencodedRequestMandateData? mandateOptions = null,
+        string? idempotencyKey = null, CancellationToken cancellationToken = default)
     {
-        _stripeUtil = stripeUtil;
-        _service = new AsyncSingleton<SetupIntentService>(CreateService);
-    }
-
-    private async ValueTask<SetupIntentService> CreateService(CancellationToken cancellationToken)
-    {
-        StripeClient client = await _stripeUtil.Get(cancellationToken)
-                                               .NoSync();
-        return new SetupIntentService(client);
-    }
-
-    public async ValueTask<SetupIntent> Create(string customerId, SetupIntentUsage? usage, bool confirm = false, string? paymentMethodId = null,
-        string? returnUrl = null, SetupIntentMandateDataOptions? mandateOptions = null, string? idempotencyKey = null,
-        CancellationToken cancellationToken = default)
-    {
-        usage ??= SetupIntentUsage.OffSession;
-
-        var options = new SetupIntentCreateOptions
+        var options = new PostSetupIntentsXWwwFormUrlencodedRequest
         {
-            Customer = customerId,
-            Usage = usage,
-            Confirm = confirm,
-            ReturnUrl = returnUrl,
-            PaymentMethod = paymentMethodId,
-            MandateData = mandateOptions,
-            AutomaticPaymentMethods = new SetupIntentAutomaticPaymentMethodsOptions { Enabled = true }
+            Customer = customerId, Confirm = confirm, PaymentMethod = paymentMethodId, ReturnUrl = returnUrl,
+            Usage = (usage ?? Soenneker.Stripe.Enums.SetupIntentUsage.SetupIntentUsage.OffSession).Value == "on_session"
+                ? PostSetupIntentsXWwwFormUrlencodedRequestUsage.OnSession : PostSetupIntentsXWwwFormUrlencodedRequestUsage.OffSession,
+            MandateData = mandateOptions, AutomaticPaymentMethods = new() { Enabled = true }
         };
-
-        SetupIntentService service = await _service.Get(cancellationToken)
-                                                   .NoSync();
-
-        if (idempotencyKey.IsNullOrWhiteSpace())
-            return await service.CreateAsync(options, cancellationToken: cancellationToken)
-                                .NoSync();
-
-        var requestOptions = new RequestOptions
-        {
-            IdempotencyKey = idempotencyKey
-        };
-
-        return await service.CreateAsync(options, requestOptions, cancellationToken)
-                            .NoSync();
+        var api = await client.Get(cancellationToken);
+        return await api.V1.Setup_intents.PostAsync(options, c => new StripeRequestOptions { IdempotencyKey = idempotencyKey }.Apply(c.Headers), cancellationToken)
+            ?? throw new InvalidOperationException("Stripe returned an empty setup intent.");
     }
 
     public ValueTask<SetupIntent> CreateAndConfirmForOffSessionCard(string customerId, string paymentMethodId, string? returnUrl = null,
-        string? idempotencyKey = null, CancellationToken cancellationToken = default)
-    {
-        return Create(customerId, usage: SetupIntentUsage.OffSession, confirm: true, paymentMethodId: paymentMethodId, returnUrl: returnUrl,
-            mandateOptions: null, idempotencyKey: idempotencyKey, cancellationToken);
-    }
+        string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+        Create(customerId, Soenneker.Stripe.Enums.SetupIntentUsage.SetupIntentUsage.OffSession, true, paymentMethodId, returnUrl, null, idempotencyKey, cancellationToken);
 
+    public async ValueTask<SetupIntent> Confirm(string id, string? paymentMethodId = null, string? returnUrl = null, CancellationToken cancellationToken = default)
+    {
+        var api = await client.Get(cancellationToken);
+        return await api.V1.Setup_intents[id].Confirm.PostAsync(new() { PaymentMethod = paymentMethodId, ReturnUrl = returnUrl }, cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("Stripe returned an empty setup intent.");
+    }
     public async ValueTask<SetupIntent> Get(string id, CancellationToken cancellationToken = default)
     {
-        SetupIntentService service = await _service.Get(cancellationToken)
-                                                   .NoSync();
-        return await service.GetAsync(id, cancellationToken: cancellationToken)
-                            .NoSync();
-    }
-
-    public async ValueTask<SetupIntent> Cancel(string id, CancellationToken cancellationToken = default)
-    {
-        SetupIntentService service = await _service.Get(cancellationToken)
-                                                   .NoSync();
-        return await service.CancelAsync(id, cancellationToken: cancellationToken)
-                            .NoSync();
-    }
-
-    public async ValueTask<SetupIntent> Confirm(string id, string? paymentMethodId = null, string? returnUrl = null,
-        CancellationToken cancellationToken = default)
-    {
-        var options = new SetupIntentConfirmOptions
-        {
-            PaymentMethod = paymentMethodId,
-            ReturnUrl = returnUrl
-        };
-
-        SetupIntentService service = await _service.Get(cancellationToken)
-                                                   .NoSync();
-        return await service.ConfirmAsync(id, options, cancellationToken: cancellationToken)
-                            .NoSync();
+        var api = await client.Get(cancellationToken);
+        return await api.V1.Setup_intents[id].GetAsync(new(), cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("Stripe returned an empty intent.");
     }
 
     public async ValueTask<SetupIntent> Update(string id, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
     {
-        var options = new SetupIntentUpdateOptions
-        {
-            Metadata = metadata
-        };
-
-        SetupIntentService service = await _service.Get(cancellationToken)
-                                                   .NoSync();
-        return await service.UpdateAsync(id, options, cancellationToken: cancellationToken)
-                            .NoSync();
+        var options = new PostSetupIntentsIntentXWwwFormUrlencodedRequest();
+        options.Metadata = new() { PostSetupIntentsIntentXWwwFormUrlencodedRequestMetadataAnyOf1 = new() { AdditionalData = metadata.ToDictionary(pair => pair.Key, pair => (object)pair.Value) } };
+        var api = await client.Get(cancellationToken);
+        return await api.V1.Setup_intents[id].PostAsync(options, cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("Stripe returned an empty intent.");
     }
 
     public async ValueTask<IEnumerable<SetupIntent>> List(string customerId, CancellationToken cancellationToken = default)
     {
-        var options = new SetupIntentListOptions
+        var api = await client.Get(cancellationToken);
+        var result = new List<SetupIntent>();
+        string? cursor = null;
+        do
         {
-            Customer = customerId,
-            Limit = 100
-        };
-
-        SetupIntentService service = await _service.Get(cancellationToken)
-                                                   .NoSync();
-        return await service.ListAsync(options, cancellationToken: cancellationToken)
-                            .NoSync();
+            var page = await api.V1.Setup_intents.GetAsync(new(), c => { c.QueryParameters.Customer = customerId; c.QueryParameters.Limit = 100; c.QueryParameters.StartingAfter = cursor; }, cancellationToken);
+            if (page?.Data is not { Count: > 0 }) break;
+            result.AddRange(page.Data);
+            cursor = page.HasMore == true ? page.Data[^1].Id : null;
+        } while (cursor != null);
+        return result;
     }
-
-    public void Dispose()
+    public async ValueTask<SetupIntent> Cancel(string id, CancellationToken cancellationToken = default)
     {
-        _service.Dispose();
+        var api = await client.Get(cancellationToken);
+        return await api.V1.Setup_intents[id].Cancel.PostAsync(new(), cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("Stripe returned an empty intent.");
     }
-
-    public ValueTask DisposeAsync()
-    {
-        return _service.DisposeAsync();
-    }
+    public void Dispose() { }
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
